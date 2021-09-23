@@ -56,13 +56,13 @@ namespace SanyoniLib.WorldRect
         {
             serializedObject.Update();
 
-            EditorGUILayout.PropertyField(m_MaxPointProp);
             EditorGUILayout.PropertyField(m_MinPointProp);
+            EditorGUILayout.PropertyField(m_MaxPointProp);
             EditorGUILayout.PropertyField(m_PreviewSegmentColorProp);
 
             EditorGUILayout.LabelField(String.Format("Size: " + m_Rect.GetSize()));
-            EditorGUILayout.LabelField(String.Format("Max: " + m_Rect.GetMaxPoint()));
             EditorGUILayout.LabelField(String.Format("Min: " + m_Rect.GetMinPoint()));
+            EditorGUILayout.LabelField(String.Format("Max: " + m_Rect.GetMaxPoint()));
             EditorGUILayout.LabelField(String.Format("Center: " + m_Rect.GetCenterPoint()));
 
             if (GUI.changed)
