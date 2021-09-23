@@ -12,7 +12,11 @@ namespace SanyoniLib.WorldRect
         public Vector3 Position
         {
             get => transform.position;
-            set => transform.position = value;
+            set
+            {
+                transform.position = value;
+                GetRect().ConstrainMinAndMax();
+            }
         }
 
         public Color GetPreviewColor() => m_PreviewColor;

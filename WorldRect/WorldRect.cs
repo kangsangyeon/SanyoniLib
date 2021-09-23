@@ -77,5 +77,28 @@ namespace SanyoniLib.WorldRect
             Vector3 _randomPoint = m_MinPoint.Position + _randomOffset;
             return _randomPoint;
         }
+
+        public bool ConstrainMinAndMax()
+        {
+            if (m_MaxPoint.Position.x < m_MinPoint.Position.x
+                || m_MaxPoint.Position.y < m_MinPoint.Position.y
+                || m_MaxPoint.Position.z < m_MinPoint.Position.z)
+            {
+                float _minX = Math.Min(m_MaxPoint.Position.x, m_MinPoint.Position.x);
+                float _minY = Math.Min(m_MaxPoint.Position.y, m_MinPoint.Position.y);
+                float _minZ = Math.Min(m_MaxPoint.Position.z, m_MinPoint.Position.z);
+
+                float _maxX = Math.Max(m_MaxPoint.Position.x, m_MinPoint.Position.x);
+                float _maxY = Math.Max(m_MaxPoint.Position.y, m_MinPoint.Position.y);
+                float _maxZ = Math.Max(m_MaxPoint.Position.z, m_MinPoint.Position.z);
+
+                m_MinPoint.Position = new Vector3(_minX, _minY, _minZ);
+                m_MaxPoint.Position = new Vector3(_maxX, _maxY, _maxZ);
+
+                return true;
+            }
+
+            return false;
+        }
     }
 }
