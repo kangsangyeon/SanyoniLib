@@ -58,6 +58,8 @@ namespace SanyoniLib.WorldRect
                 HandleUtility.GetHandleSize(_point.transform.position) * 0.1f,
                 Vector3.zero,
                 Handles.CircleHandleCap);
+
+            Undo.RecordObject(_point.transform, "Move World Rect Point");
             _point.Position = _newPosition;
 
             Handles.color = _originColor;
