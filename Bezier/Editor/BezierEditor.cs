@@ -1,17 +1,16 @@
 ﻿using System;
-using SanyoniLib;
-using SanyoniLib.SystemHelper;
 using UnityEngine;
 using UnityEditor;
 
-namespace SanyoniLib.Bezier
+namespace SanyoniLib.Bezier.Editor
 {
     [CustomEditor(typeof(Bezier))]
-    public class BezierEditor : Editor
+    public class BezierEditor : UnityEditor.Editor
     {
         private Bezier Bezier;
 
         private SerializedProperty PointsProp;
+        private SerializedProperty bConstraintPointsYProp;
         private SerializedProperty PreviewSegmentColorProp;
         private SerializedProperty PreviewSegmentCountProp;
         private SerializedProperty PreviewSegmentWidthProp;
@@ -23,6 +22,7 @@ namespace SanyoniLib.Bezier
             Bezier = (Bezier)target;
 
             PointsProp = serializedObject.FindProperty("Points");
+            bConstraintPointsYProp = serializedObject.FindProperty("bConstraintPointsY");
             PreviewSegmentColorProp = serializedObject.FindProperty("PreviewSegmentColor");
             PreviewSegmentCountProp = serializedObject.FindProperty("PreviewSegmentCount");
             PreviewSegmentWidthProp = serializedObject.FindProperty("PreviewSegmentWidth");
@@ -33,6 +33,7 @@ namespace SanyoniLib.Bezier
             serializedObject.Update();
 
             // EditorGUILayout.PropertyField(PointsProp);
+            EditorGUILayout.PropertyField(bConstraintPointsYProp);
             EditorGUILayout.PropertyField(PreviewSegmentColorProp);
             EditorGUILayout.PropertyField(PreviewSegmentCountProp);
             EditorGUILayout.PropertyField(PreviewSegmentWidthProp);
@@ -54,28 +55,9 @@ namespace SanyoniLib.Bezier
         {
             if (Bezier == null || Bezier.IsValid() == false)
                 return;
-
-            // Bezier 미리보기 선을 표시합니다.
-            DrawSceneBezier(Bezier);
-
+            
             // Bezier Point를 표시합니다.
             DrawSceneBezierPoints(Bezier);
-        }
-
-        public static void DrawSceneBezier(Bezier _bezier)
-        {
-            Color _originColor = Handles.color;
-            Handles.color = _bezier.GetPreviewSegmentColor();
-
-            var _previewSegmentPoints = _bezier.GetPreviewSegmentPoints();
-            for (int i = 0; i < _previewSegmentPoints.Length - 1; i++)
-            {
-                Vector3 _start = _previewSegmentPoints[i];
-                Vector3 _end = _previewSegmentPoints[i + 1];
-                Handles.DrawLine(_start, _end);
-            }
-
-            Handles.color = _originColor;
         }
 
         public static void DrawSceneBezierPoints(Bezier _bezier)
@@ -149,22 +131,20 @@ namespace SanyoniLib.Bezier
 
         private void DrawInspectorAddPointButton()
         {
-            //     if (GUILayout.Button("Add Point"))
-            //     {
-            //         Undo.RegisterSceneUndo("Add Point");
-            //
-            //         GameObject pointObject = new GameObject("Point " + pointsProp.arraySize);
-            //         pointObject.transform.parent = curve.transform;
-            //         pointObject.transform.localPosition = Vector3.zero;
-            //         BezierPoint newPoint = pointObject.AddComponent<BezierPoint>();
-            //
-            //         newPoint.curve = curve;
-            //         newPoint.handle1 = Vector3.right * 0.1f;
-            //         newPoint.handle2 = -Vector3.right * 0.1f;
-            //
-            //         pointsProp.InsertArrayElementAtIndex(pointsProp.arraySize);
-            //         pointsProp.GetArrayElementAtIndex(pointsProp.arraySize - 1).objectReferenceValue = newPoint;
-            //     }
+            if (GUILayout.Button("Add Point"))
+            {
+                Undo.RegisterSceneUndo("Add Point");
+
+                GameObject pointObject = new GameObject("Point " + PointsProp.arraySize);
+                pointObject.transform.parent = Bezier.transform;
+                pointObject.transform.position = Vector3.zero;
+
+                BezierPoint newPoint = pointObject.AddComponent<BezierPoint>();
+                newPoint.Initialize(Bezier);
+
+                PointsProp.InsertArrayElementAtIndex(PointsProp.arraySize);
+                PointsProp.GetArrayElementAtIndex(PointsProp.arraySize - 1).objectReferenceValue = newPoint;
+            }
         }
     }
 }
