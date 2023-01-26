@@ -176,11 +176,11 @@ public class TilemapHelper
         var tyPaintingState = GetType("UnityEditor.Tilemaps.GridPaintingState");
         tyPaintingState.GetProperty("gridBrush").SetValue(null, brush);
 
-        if (EditorTools.activeToolType.Namespace != "UnityEditor.Tilemaps")
+        if (ToolManager.activeToolType.Namespace != "UnityEditor.Tilemaps")
         {
             // 덤으로 툴 선택까지 하기
             // 기본툴은 역시 브러쉬지
-            EditorTools.SetActiveTool(GetType("UnityEditor.Tilemaps.PaintTool"));
+            ToolManager.SetActiveTool(GetType("UnityEditor.Tilemaps.PaintTool"));
         }
     }
 
@@ -336,7 +336,7 @@ public class TilemapHelper
 
     static void OnSceneGUI(SceneView sceneView)
     {
-        if (EditorTools.activeToolType.Namespace == "UnityEditor.Tilemaps")
+        if (ToolManager.activeToolType.Namespace == "UnityEditor.Tilemaps")
         {
             var activeTarget = GetTarget();
             var tilemap = activeTarget.GetComponent<Tilemap>();
