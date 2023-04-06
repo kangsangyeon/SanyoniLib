@@ -11,10 +11,8 @@ using NAudio.Wave;
 
 namespace SanyoniLib.UnityEngineHelper
 {
-
     public static class ResourcesHelper
     {
-
         #region Image Method
 
         private const string BmpExtensionText = ".bmp";
@@ -30,7 +28,8 @@ namespace SanyoniLib.UnityEngineHelper
             return CreateSpriteWithTexture2D(texture, 0, 0, texture.width, texture.height, new Vector2(.5f, .5f));
         }
 
-        public static Sprite CreateSpriteWithTexture2D(Texture2D texture, int x, int y, int width, int height, Vector2 pivot)
+        public static Sprite CreateSpriteWithTexture2D(Texture2D texture, int x, int y, int width, int height,
+            Vector2 pivot)
         {
             Rect textureRect = new Rect(x, y, width, height);
             Sprite newSprite = Sprite.Create(texture, textureRect, pivot);
@@ -45,10 +44,8 @@ namespace SanyoniLib.UnityEngineHelper
 
         public static IEnumerator CLoadSprite(string dir, string fileName, System.Action<Sprite> callback)
         {
-            yield return GlobalInstance.Instance.StartCoroutine(CLoadTexture(dir, fileName, texture =>
-            {
-                callback?.Invoke(CreateSpriteWithTexture2D(texture));
-            }));
+            yield return GlobalInstance.Instance.StartCoroutine(CLoadTexture(dir, fileName,
+                texture => { callback?.Invoke(CreateSpriteWithTexture2D(texture)); }));
         }
 
         public static void LoadTextureIfExist(string dir, string fileName, System.Action<Texture2D> callback)
@@ -63,7 +60,6 @@ namespace SanyoniLib.UnityEngineHelper
             {
                 Debug.LogError($@"파일을 불러올 수 없습니다. {dir}/{realFileName}");
             }
-
         }
 
         public static void LoadTexture(string dir, string fileName, System.Action<Texture2D> callback)
@@ -152,21 +148,37 @@ namespace SanyoniLib.UnityEngineHelper
             // mpeg는 라이센스 문제로 유니티에서 기본제공하지 않기 때문에 NAudio를 사용한다.
             else if (type == AudioType.MPEG)
             {
-                WWW www = new WWW(uri);
+                UnityWebRequest _request = UnityWebRequest.Get(uri);
+                yield return _request.SendWebRequest();
 
-                yield return new WaitUntil(() => www.isDone == true || www.error != null);
-
-                if (www.bytes.Length != 0)
+                if (_request.downloadedBytes != 0)
                 {
-                    clip = ResourcesHelper.FromMp3Data(www.bytes);
+                    clip = ResourcesHelper.FromMp3Data(_request.downloadHandler.data);
                     clip.LoadAudioData();
                 }
                 else
                 {
-                    Debug.LogError($"Failed to read sound data : {www.url}");
+                    Debug.LogError($"Failed to read sound data : {_request.url}");
                     Debug.LogError($"\t{uri}");
                     //throw new System.Exception();
                 }
+
+
+                // WWW www = new WWW(uri);
+                //
+                // yield return new WaitUntil(() => www.isDone == true || www.error != null);
+                //
+                // if (www.bytes.Length != 0)
+                // {
+                //     clip = ResourcesHelper.FromMp3Data(www.bytes);
+                //     clip.LoadAudioData();
+                // }
+                // else
+                // {
+                //     Debug.LogError($"Failed to read sound data : {www.url}");
+                //     Debug.LogError($"\t{uri}");
+                //     //throw new System.Exception();
+                // }
             }
             else
             {
@@ -204,6 +216,7 @@ namespace SanyoniLib.UnityEngineHelper
                 waveFileWriter.Write(bytes, 0, bytes.Length);
                 waveFileWriter.Flush();
             }
+
             return outputStream;
         }
 
@@ -211,7 +224,6 @@ namespace SanyoniLib.UnityEngineHelper
         /* From http://answers.unity3d.com/questions/737002/wav-byte-to-audioclip.html */
         public class WAV
         {
-
             // convert two bytes to one float in the range -1 to 1
             static float bytesToFloat(byte firstByte, byte secondByte)
             {
@@ -228,8 +240,10 @@ namespace SanyoniLib.UnityEngineHelper
                 {
                     value |= ((int)bytes[offset + i]) << (i * 8);
                 }
+
                 return value;
             }
+
             // properties
             public float[] LeftChannel { get; internal set; }
             public float[] RightChannel { get; internal set; }
@@ -239,15 +253,14 @@ namespace SanyoniLib.UnityEngineHelper
 
             public WAV(byte[] wav)
             {
-
                 // Determine if mono or stereo
-                ChannelCount = wav[22];     // Forget byte 23 as 99.999% of WAVs are 1 or 2 channels
+                ChannelCount = wav[22]; // Forget byte 23 as 99.999% of WAVs are 1 or 2 channels
 
                 // Get the frequency
                 Frequency = bytesToInt(wav, 24);
 
                 // Get past all the other sub chunks to get to the data subchunk:
-                int pos = 12;   // First Subchunk ID from 12 to 16
+                int pos = 12; // First Subchunk ID from 12 to 16
 
                 // Keep iterating until we find the data chunk (i.e. 64 61 74 61 ...... (i.e. 100 97 116 97 in decimal))
                 while (!(wav[pos] == 100 && wav[pos + 1] == 97 && wav[pos + 2] == 116 && wav[pos + 3] == 97))
@@ -256,11 +269,12 @@ namespace SanyoniLib.UnityEngineHelper
                     int chunkSize = wav[pos] + wav[pos + 1] * 256 + wav[pos + 2] * 65536 + wav[pos + 3] * 16777216;
                     pos += 4 + chunkSize;
                 }
+
                 pos += 8;
 
                 // Pos is now positioned to start of actual sound data.
-                SampleCount = (wav.Length - pos) / 2;     // 2 bytes per sample (16 bit sound mono)
-                if (ChannelCount == 2) SampleCount /= 2;        // 4 bytes per sample (16 bit stereo)
+                SampleCount = (wav.Length - pos) / 2; // 2 bytes per sample (16 bit sound mono)
+                if (ChannelCount == 2) SampleCount /= 2; // 4 bytes per sample (16 bit stereo)
 
                 // Allocate memory (right will be null if only mono sound)
                 LeftChannel = new float[SampleCount];
@@ -278,18 +292,19 @@ namespace SanyoniLib.UnityEngineHelper
                         RightChannel[i] = bytesToFloat(wav[pos], wav[pos + 1]);
                         pos += 2;
                     }
+
                     i++;
                 }
             }
 
             public override string ToString()
             {
-                return string.Format("[WAV: LeftChannel={0}, RightChannel={1}, ChannelCount={2}, SampleCount={3}, Frequency={4}]", LeftChannel, RightChannel, ChannelCount, SampleCount, Frequency);
+                return string.Format(
+                    "[WAV: LeftChannel={0}, RightChannel={1}, ChannelCount={2}, SampleCount={3}, Frequency={4}]",
+                    LeftChannel, RightChannel, ChannelCount, SampleCount, Frequency);
             }
         }
 
         #endregion
-
     }
-
 }

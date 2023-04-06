@@ -22,7 +22,7 @@ namespace SanyoniLib.Bezier
             int _previewSegmentCount = 50,
             float _previewSegmentWidth = 3f)
         {
-            GameObject _newBezierGO = new GameObject("Generated Bezier_" + GUID.Generate().ToString());
+            GameObject _newBezierGO = new GameObject("Generated Bezier_" + Guid.NewGuid().ToString());
             Bezier _bezier = _newBezierGO.AddComponent<Bezier>();
 
             BezierPoint[] _bezierPoints = new BezierPoint[_points.Length];
@@ -192,6 +192,7 @@ namespace SanyoniLib.Bezier
             return new BezierResult(this, _points[0], _direction.normalized, _delta);
         }
 
+#if UNITY_EDITOR
         private void OnDrawGizmos()
         {
             // Bezier 미리보기 선을 표시합니다.
@@ -214,5 +215,6 @@ namespace SanyoniLib.Bezier
         {
             TryConstraintPoints();
         }
+#endif
     }
 }

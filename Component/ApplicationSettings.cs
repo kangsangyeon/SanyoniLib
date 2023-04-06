@@ -44,7 +44,7 @@ public class ApplicationSettings : MonoBehaviour
         bool _existSettings = PlayerPrefs.GetInt(EXIST_SETTINGS_PROP) != 0;
         if (_existSettings == false)
         {
-            OverwriteFromCurrentSettings();
+            OverwriteFromCurrentContext();
             SaveSettings();
         }
 #endif
